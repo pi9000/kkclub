@@ -51,6 +51,7 @@ class SettingController extends Controller
         $web->gateway_apikey = $request->gateway_apikey;
         $web->gateway_secretkey = $request->gateway_secretkey;
         $web->gateway_endpoint = $request->gateway_endpoint;
+        $web->telegram_chat_id = $request->telegram_chat_id;
         $web->save();
         $contact->save();
         return response()->json([
