@@ -182,7 +182,7 @@ class HomeController extends Controller
 
     public function norek(Request $request)
     {
-        $bank = DB::table('users')->where('nomor_rekening', $request->norek)->first();
+        $bank = DB::table('users')->where('agent_id', config('agent_id'))->where('nomor_rekening', $request->norek)->first();
         if (!$bank) {
             return response()->json([
                 'error' => __('public.accnum_available'),
@@ -204,7 +204,7 @@ class HomeController extends Controller
             }
         }
 
-        $promotion = DB::table('tb_bonus')->where('status', 'active')->where('type', '!=', 2)->get();
+        $promotion = DB::table('tb_bonus')->where('agent_id', config('agent_id'))->where('status', 'active')->get();
         return view('frontend.promotion.promotion', compact('promotion'));
     }
 
@@ -216,8 +216,8 @@ class HomeController extends Controller
             }
         }
 
-        $promotion = DB::table('tb_bonus')->where('status', 'active')->where('type', '!=', 2)->get();
-        $now = DB::table('tb_bonus')->where('slug', $slug)->first();
+        $promotion = DB::table('tb_bonus')->where('agent_id', config('agent_id'))->where('status', 'active')->get();
+        $now = DB::table('tb_bonus')->where('agent_id', config('agent_id'))->where('slug', $slug)->first();
         return view('frontend.promotion.detail', compact('promotion', 'now'));
     }
 

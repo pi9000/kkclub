@@ -164,32 +164,20 @@ server {
     listen 80;
     listen [::]:80;
     server_name $domain www.$domain;
+
     root $webRoot;
-
-    add_header X-Frame-Options \"SAMEORIGIN\";
-    add_header X-Content-Type-Options \"nosniff\";
-
     index index.php index.html;
-
-    charset utf-8;
-
-    access_log /var/log/nginx/{$domain}_access.log;
-    error_log /var/log/nginx/{$domain}_error.log;
 
     location / {
         try_files \$uri \$uri/ /index.php?\$query_string;
     }
 
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
     error_page 404 /index.php;
 
-    location ~ \.php\$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+    location ~ \.php$ {
         include fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     }
 
     location ~ /\.(?!well-known).* {
@@ -206,6 +194,7 @@ server {
         }
 
         shell_exec("sudo systemctl reload nginx");
+        shell_exec("sudo certbot --nginx -d $domain");
 
         return response()->json([
             'status' => 'success',
