@@ -10,7 +10,7 @@
             @foreach ($promotion as $item)
             <div class="promotion-card" data-value="{{ $item->id }}" show="{{ $item->id }}">
                 <div class="top">
-                    <img class="background" alt src="{{ $item->gambar }}">
+                    <img class="background" alt src="{{ env('AWS_URL') }}{{ $item->gambar }}">
                 </div>
 
                 <div class="promotion-content">
@@ -45,7 +45,7 @@
         <div class="content-body">
             <section class="default">
                 <div class="media-wrap">
-                    <img src="{{ $item->gambar }}">
+                    <img src="{{ env('AWS_URL') }}{{ $item->gambar }}">
                 </div>
                 {!! $item->text !!}
                 <button class="btn btn-applybonus" onclick="showLoading();window.location.href='{{ route('deposit') }}'">Apply
