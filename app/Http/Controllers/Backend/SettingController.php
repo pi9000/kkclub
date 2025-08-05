@@ -1,0 +1,253 @@
+<?php
+
+namespace App\Http\Controllers\Backend;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Settings;
+use Illuminate\Support\Facades\Http;
+use App\Models\Contact;
+use Illuminate\Support\Facades\DB;
+use App\Models\ApiProvider;
+use App\Models\DomainList;
+use App\Models\Banner;
+use Illuminate\Support\Facades\File;
+
+class SettingController extends Controller
+{
+    public function index(Request $request)
+    {
+        $web = Settings::where('agent_id', $request->agent_id)->first();
+        $contact = Contact::where('agent_id', $request->agent_id)->first();
+        $api = DB::table('api_providers')->where('agent_id', $request->agent_id)->get();
+        return response()->json([
+            'status' => 'success',
+            'web' => $web,
+            'contact' => $contact,
+            'api' => $api,
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $web = Settings::where('agent_id', $request->agent_id)->first();
+        $contact = Contact::where('agent_id', $request->agent_id)->first();
+        $web->logo = $request->logo;
+        $web->min_depo = $request->min_depo;
+        $web->min_wd = $request->min_wd;
+        $web->title = $request->title;
+        $web->judul = $request->judul;
+        $web->deskripsi = $request->deskripsi;
+        $web->keyword = $request->keyword;
+        $web->icon_web = $request->icon_web;
+        $web->notif_bar = $request->notif_bar;
+        $contact->no_whatsapp = $request->no_whatsapp;
+        $contact->script = $request->script;
+        $web->tutorial_withdraw = $request->tutorial_withdraw;
+        $web->tutorial_register = $request->tutorial_register;
+        $web->tutorial_deposit = $request->tutorial_deposit;
+        $web->home_footer = $request->home_footer;
+        $web->gateway_merchant = $request->home_footer;
+        $web->gateway_apikey = $request->gateway_apikey;
+        $web->gateway_secretkey = $request->gateway_secretkey;
+        $web->gateway_endpoint = $request->gateway_endpoint;
+        $web->save();
+        $contact->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Website Successfully updated',
+        ]);
+    }
+
+    public function edit_api($id, Request $request)
+    {
+        $apiss = ApiProvider::find($id);
+        if (!$apiss) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'API Provider not found',
+            ], 404);
+        }
+        $apiss->apikey = $request->apikey;
+        $apiss->secretkey = $request->secretkey;
+        $apiss->agentcode = $request->agentcode;
+        $apiss->token = $request->agentcode;
+        $apiss->url = $request->url;
+        $apiss->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'API Successfully updated',
+        ]);
+    }
+
+    public function domain_list(Request $request)
+    {
+        $domains = DomainList::where('agent_id', $request->agent_id)->orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => $domains,
+        ]);
+    }
+
+    public function domain_remove(Request $request, $id)
+    {
+        $domain = DomainList::where('zone_id', $id)->first();
+        if (!$domain) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Domain not found',
+            ], 404);
+        }
+        $domain->delete();
+
+        Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+            ->delete("https://api.cloudflare.com/client/v4/zones/{$domain->zone_id}");
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Domain Successfully removed',
+        ]);
+    }
+
+    public function add_domain(Request $request)
+    {
+        $domain = $request->domain;
+        $tenantId = $request->agent_id;
+
+        $domain_check = DomainList::where('agent_id', $tenantId)->count();
+        if ($domain_check >= 30) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Domain limit exceeded',
+            ], 200);
+        }
+
+        $addZone = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+            ->post(env('CLOUDFLARE_API_BASE') . '/zones', [
+                'name' => $domain,
+                'type' => 'full',
+                'jump_start' => true
+            ]);
+
+        if (!($addZone['success'] ?? false)) {
+            return response()->json(['error' => $addZone['errors']], 400);
+        }
+
+        $zone = $addZone['result'];
+
+        Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+            ->post(env('CLOUDFLARE_API_BASE') . "/zones/{$zone['id']}/dns_records", [
+                'type' => 'A',
+                'name' => $domain,
+                'content' => '123.123.123.123',
+                'ttl' => 3600,
+                'proxied' => true
+            ]);
+
+        $domainList = new DomainList();
+        $domainList->agent_id = $tenantId;
+        $domainList->domain = $domain;
+        $domainList->zone_id = $zone['id'];
+        $domainList->ns1 = $zone['name_servers'][0] ?? null;
+        $domainList->ns2 = $zone['name_servers'][1] ?? null;
+        $domainList->type = 'main';
+        $domainList->save();
+
+        $nginxAvailablePath = "/etc/nginx/sites-available/$domain";
+        $nginxEnabledPath = "/etc/nginx/sites-enabled/$domain";
+        $webRoot = env('WEB_ROOT_NGINX');
+
+        $nginxConf = "
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $domain www.$domain;
+    root $webRoot;
+
+    add_header X-Frame-Options \"SAMEORIGIN\";
+    add_header X-Content-Type-Options \"nosniff\";
+
+    index index.php index.html;
+
+    charset utf-8;
+
+    access_log /var/log/nginx/{$domain}_access.log;
+    error_log /var/log/nginx/{$domain}_error.log;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php\$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+";
+
+
+        File::put($nginxAvailablePath, $nginxConf);
+
+        if (!file_exists($nginxEnabledPath)) {
+            shell_exec("ln -s $nginxAvailablePath $nginxEnabledPath");
+        }
+
+        shell_exec("sudo systemctl reload nginx");
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Domain successfully added',
+        ], 200);
+    }
+
+    public function sliding_banner(Request $request)
+    {
+        $banner = Banner::where('agent_id', $request->agent_id)->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => $banner
+        ]);
+    }
+
+    public function sliding_banner_create(Request $request)
+    {
+        $banner = new Banner();
+        $banner->agent_id = $request->agent_id;
+        $banner->gambar = $request->banner_image;
+        $banner->status = 'active';
+        $banner->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Banner Created'
+        ]);
+    }
+
+    public function sliding_banner_delete($id, Request $request)
+    {
+        $banner = Banner::find($id);
+        if (!$banner) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Banner not found',
+            ], 404);
+        }
+        $banner->delete();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Banner Successfully deleted',
+        ]);
+    }
+}

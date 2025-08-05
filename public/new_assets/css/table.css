@@ -1,0 +1,28 @@
+.table-pagination{
+	display: flex;
+	gap:1rem;
+	align-items: center;
+	justify-content: end;
+    padding: 1.5rem 0;
+    font-size:1.4rem;
+}
+
+.table-pagination ul{
+	margin: 0;
+	padding: 0;
+	display: flex;
+	gap:0.5rem;
+	list-style:none;
+}
+
+.table-pagination li{
+	min-width: 2rem;
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 0.8rem;
+    background: rgba(0,0,0,0.1);
+}
+
+.table-pagination ul .active{
+	background: rgb(237 175 62);
+}

@@ -1,0 +1,329 @@
+.member-bonus-wrap{
+    width: 100%;
+    filter: drop-shadow(0 0.5rem 0.8rem rgba(0,0,0,0.5));
+    position: relative;
+    border-radius: 0.8rem;
+    display: flex;
+    margin-top: 2rem;
+    align-items: center;
+    position: relative;
+}
+
+.bg-bonus-gold{
+    background-image: url('../images/golden-background.jpg');
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.bg-bonus-black{
+    background-image: url('../images/black-background.jpg');
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.bg-bonus-platinum{
+    background-image: url('../images/platinum-background.png');
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.member-bonus-wrap .more-detail{
+    position: absolute;
+    top:0.5rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.3rem;
+    color: black;
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.member-bonus-wrap svg > *{
+    color: black;
+}
+
+.member-bonus-wrap .col-1{
+    display: flex;
+    position: relative;
+    margin-top: -2rem;
+    width: 50%;
+    display: flex;
+}
+
+.member-bonus-wrap .col-1 img{
+    width: 95%;
+}
+
+.member-bonus-wrap .col-2{
+    display: flex;
+    height: calc(100% + 2rem);
+    width:50%;
+    padding: 1rem 1rem 1rem 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.member-bonus-wrap .col-2 .title{
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.member-bonus-wrap .col-2 .description{
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+
+.referral-bonus .col-2 .title, .referral-bonus .col-2 .description{
+    color: #745100; 
+}
+
+.monthly-bonus .col-2 .title, .monthly-bonus .col-2 .description{
+    color: #c7a317; 
+}
+
+.invite-bonus .col-2 .title, .invite-bonus .col-2 .description{
+    color: white;
+}
+
+.claim-bonus{
+    background: rgba(255,255,255, 1);
+    margin-top: 1rem;
+    box-sizing: border-box;
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.claim-bonus .amount{
+    font-size: 1.4rem;
+    font-weight: 600;
+    padding: 0.6rem;
+    color: black;
+}
+
+.claim-bonus span{
+    color: black;
+}
+
+.claim-bonus .btn-claim{
+    box-sizing: border-box;
+    padding:0.5rem 1rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-radius: 0 0.5rem 0.5rem 0;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    min-width: 8rem;
+    justify-content: center;
+}
+
+.bg-bonus-gold .btn-claim{
+    color: white;
+    background: black;
+}
+
+.bg-bonus-black .btn-claim{
+    color: white;
+    background: black;
+}
+
+.bg-bonus-platinum .btn-claim{
+    color: white;
+    background: #c7a317;
+}
+
+.referral-info{
+    /*background: #313644;*/
+    /*background: var(--theme-grd-gold);*/
+    background-image: url(../images/referral_background.png);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    gap: 1.5rem;
+    position: relative;
+    border: 1.5px solid var(--theme-clr-gold);
+
+}
+
+.referral-info .row{
+    display: flex;
+    flex-direction: column;
+    gap:0.5rem;
+    text-align: center;
+}
+
+.referral-info .row-2 i{
+    font-size: 1rem;
+}
+
+.total-invitee{
+    font-size: 2.4rem;
+    font-weight: 700;
+}
+
+#total-downline{
+    background: rgba(0,0,0, 0.3);
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    margin: auto;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+#total-downline span{
+    font-weight:600;
+    font-size: 1.2rem;
+}
+
+#view-referral-record{
+    display: flex;
+    gap: 0.5rem;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    align-items:center;
+    background: rgba(0,0,0,0.3);
+    box-sizing: border-box;
+    padding: 0.3rem 1rem;
+    font-size: 1.2rem;
+    border-radius: 0.4rem;
+}
+
+#view-referral-record svg > * {
+    color:white;
+}
+
+.copy-animation {
+    animation-name: copy-animation;
+    animation-duration: 0.3s; /* Set the duration of the animation */
+}
+
+@keyframes copy-animation {
+    0% {
+        box-shadow: inset 0 0 0 0 var(--clr-success);
+    }
+    50% {
+        box-shadow: inset 0 0 0 1px var(--clr-success);
+    }
+
+    100%{
+        box-shadow: inset 0 0 0 0 var(--clr-success);
+    }
+}
+
+#referral-details .image-wrapper img, #claim-bonus .image-wrapper img, #referral-count-details .image-wrapper img{
+    width:100%;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#referral-details .title, #referral-count-details .title , #claim-bonus .title{
+    text-align: center;
+    font-size: 2rem;
+}
+
+#claim-bonus .action-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+#claim-bonus .action-wrapper a{
+    text-align: center;
+    font-weight: var(--fw-medium);
+    text-decoration: underline;
+}
+
+#referral-details ol, #referral-count-details ol{
+    padding-inline-start: 1.6rem;
+} 
+
+#referral-details li, #referral-count-details li{
+    margin-bottom: 1rem;
+}
+
+#monthly_bonus .image-wrapper img, #claim-bonus .image-wrapper img, #referral-count-details .image-wrapper img{
+    width:100%;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#monthly_bonus .title, #referral-count-details .title , #claim-bonus .title{
+    text-align: center;
+    font-size: 2rem;
+}
+
+#claim-bonus .action-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+#claim-bonus .action-wrapper a{
+    text-align: center;
+    font-weight: var(--fw-medium);
+    text-decoration: underline;
+}
+
+#monthly_bonus ol, #referral-count-details ol{
+    padding-inline-start: 1.6rem;
+} 
+
+#monthly_bonus li, #referral-count-details li{
+    margin-bottom: 1rem;
+}
+
+.social-placing{
+    display:flex;
+    justify-content: center; 
+    gap:1rem;
+    align-items: center;
+}
+
+.social-placing > div{
+    flex: 0 0 12%;
+}
+
+.social-size{
+    width: 100%;
+}
+
+.social-border{
+    border: 1px solid transparent; 
+    border-radius: 0.5rem;  
+    background-color:#1F2937; 
+    width:auto; 
+    height:auto; 
+}
+
+.social-share{
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.count-bonus-note{
+    text-align:center;
+    font-size:1.2rem;
+    font-style: italic;
+}
+
+.referral-bonus-section{
+    box-sizing: border-box;
+    max-width: 480px;
+    margin: auto;
+}
