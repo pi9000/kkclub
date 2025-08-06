@@ -13,27 +13,11 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ProviderController extends Controller
 {
-    public function index(Request $request)
-    {
-        $apiss = ApiProvider::orderBy('status', 'DESC')->get();
-        $api = ApiActive::first();
-
-        return view('backend.api', compact('apiss', 'api'));
-    }
-
-    public function call(Request $request)
-    {
-        $api = new SeamlesWsController();
-        $playing = $api->call_players();
-        $api = ApiActive::first();
-
-        return view('backend.call', compact('playing'));
-    }
 
     public function call_players(Request $request)
     {
         $api = new SeamlesWsController();
-        $playing = $api->call_players();
+        $playing = $api->call_players($request->agent_id);
 
         return $playing;
     }
@@ -41,7 +25,7 @@ class ProviderController extends Controller
     public function call_list(Request $request)
     {
         $api = new SeamlesWsController();
-        $playing = $api->call_list($request->providerCode, $request->gameCode);
+        $playing = $api->call_list($request->agent_id, $request->providerCode, $request->gameCode);
 
         return $playing;
     }
@@ -49,15 +33,15 @@ class ProviderController extends Controller
     public function call_apply(Request $request)
     {
         $api = new SeamlesWsController();
-        $playing = $api->call_apply($request->providerCode, $request->gameCode, $request->userCode, $request->callRtp, $request->callType);
+        $playing = $api->call_apply($request->agent_id,$request->providerCode, $request->gameCode, $request->userCode, $request->callRtp, $request->callType);
 
         return $playing;
     }
 
-    public function rtp(Request $request)
+    public function call_rtp(Request $request)
     {
         $api = new SeamlesWsController();
-        $playing = $api->control_rtp($request->providerCode, $request->userCode, $request->rtp);
+        $playing = $api->control_rtp($request->agent_id,$request->providerCode, $request->userCode, $request->rtp);
 
         return $playing;
     }

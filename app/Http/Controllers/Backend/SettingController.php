@@ -52,6 +52,7 @@ class SettingController extends Controller
         $web->gateway_secretkey = $request->gateway_secretkey;
         $web->gateway_endpoint = $request->gateway_endpoint;
         $web->telegram_chat_id = $request->telegram_chat_id;
+        $web->costum_script = $request->costum_script;
         $web->save();
         $contact->save();
         return response()->json([
@@ -238,6 +239,16 @@ server {
         return response()->json([
             'status' => 'success',
             'message' => 'Banner Successfully deleted',
+        ]);
+    }
+
+    public function brand_management(Request $request)
+    {
+        $settings = Settings::where('agent_id', $request->agent_id)->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $settings
         ]);
     }
 }

@@ -464,6 +464,8 @@
         }
     </script>
 
+    {!! general()->costum_script !!}
+
 </head>
 
 <body style="margin:auto" class="">

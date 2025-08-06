@@ -77,6 +77,13 @@ Route::namespace('Backend')->prefix('bo/v2')->name('admin.')->group(function () 
         Route::post('banks/create', 'BankController@create')->name('bank.create');
         Route::post('banks/{id}/update', 'BankController@update')->name('bank.update');
         Route::post('banks/{id}/delete', 'BankController@delete')->name('bank.delete');
+
+        Route::post('games/call_players', 'ProviderController@call_players')->name('calls.list');
+        Route::post('games/call_list', 'ProviderController@call_list')->name('calls.list');
+        Route::post('games/call_apply', 'ProviderController@call_apply')->name('calls.list');
+        Route::post('games/call_rtp', 'ProviderController@call_rtp')->name('calls.call_rtp');
+
+        Route::post('brand_management', 'SettingController@brand_management')->name('brand_management');
     });
 
     Route::get('config-clear', function () {

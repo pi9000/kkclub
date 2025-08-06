@@ -20,22 +20,22 @@ class SeamlesWsController extends Controller
         ]);
     }
 
-    public function call_players()
+    public function call_players($agent_id)
     {
-        $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
+        $api = DB::table('api_providers')->where('agent_id', $agent_id)->where('provider','=','NexusGGR')->first();
         $params = [
             'method' => 'call_players',
             'agent_code' => $api->apikey,
             'agent_token' => $api->secretkey,
         ];
 
-        $result = json_decode($this->curl_postc($params));
+        $result = json_decode($this->curl_postc($params,$api->url));
         return $result;
     }
 
-    public function call_list($provider_code, $game_code)
+    public function call_list($agent_id,$provider_code, $game_code)
     {
-        $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
+        $api = DB::table('api_providers')->where('agent_id', $agent_id)->where('provider','=','NexusGGR')->first();
         $params = [
             'method' => 'call_list',
             'agent_code' => $api->apikey,
@@ -43,13 +43,13 @@ class SeamlesWsController extends Controller
             'provider_code' => $provider_code,
             'game_code' => $game_code
         ];
-        $result = json_decode($this->curl_postc($params));
+        $result = $this->curl_postc($params, $api->url);
         return $result;
     }
 
-    public function call_apply($provider_code, $game_code, $user_code, $call_rtp, $call_type)
+    public function call_apply($agent_id,$provider_code, $game_code, $user_code, $call_rtp, $call_type)
     {
-        $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
+        $api = DB::table('api_providers')->where('agent_id', $agent_id)->where('provider','=','NexusGGR')->first();
         $params = [
             'method' => 'call_apply',
             'agent_code' => $api->apikey,
@@ -60,24 +60,24 @@ class SeamlesWsController extends Controller
             'call_rtp' => $call_rtp,
             'call_type' => $call_type
         ];
-        $result = json_decode($this->curl_postc($params));
+        $result = json_decode($this->curl_postc($params,$api->url));
         return $result;
     }
 
-    public function call_cancel($id)
+    public function call_cancel($id,$agent_id)
     {
-        $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
+        $api = DB::table('api_providers')->where('agent_id', $agent_id)->where('provider','=','NexusGGR')->first();
         $params = [
             'method' => 'call_cancel',
             'agent_code' => $api->apikey,
             'agent_token' => $api->secretkey,
             'call_id' => $id
         ];
-        $result = json_decode($this->curl_postc($params));
+        $result = json_decode($this->curl_postc($params,$api->url));
         return $result;
     }
 
-    public function call_history()
+    public function call_history($agent_id)
     {
         $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
         $params = [
@@ -87,13 +87,13 @@ class SeamlesWsController extends Controller
             'offset' => 0,
             'limit' => 1000
         ];
-        $result = json_decode($this->curl_postc($params));
+        $result = json_decode($this->curl_postc($params,$api->url));
         return $result;
     }
 
-    public function control_rtp($provider_code, $user_code, $rtp)
+    public function control_rtp($agent_id,$provider_code, $user_code, $rtp)
     {
-        $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
+        $api = DB::table('api_providers')->where('agent_id', $$agent_id)->where('provider','=','NexusGGR')->first();
         $params = [
             'method' => 'control_rtp',
             'agent_code' => $api->apikey,
@@ -102,7 +102,7 @@ class SeamlesWsController extends Controller
             'user_code' => $user_code,
             'rtp' => $rtp
         ];
-        $result = json_decode($this->curl_postc($params));
+        $result = json_decode($this->curl_postc($params,$api->url));
         return $result;
     }
 
@@ -136,10 +136,8 @@ class SeamlesWsController extends Controller
         ]);
     }
 
-    function curl_postc($endpoint)
+    function curl_postc($endpoint,$url)
     {
-        $api = DB::table('api_providers')->where('agent_id', general()->agent_id)->where('provider','=','NexusGGR')->first();
-
         $jsonData = json_encode($endpoint, JSON_NUMERIC_CHECK);
 
         $headerArray = ['Content-Type: application/json'];
@@ -147,7 +145,7 @@ class SeamlesWsController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $api->url,
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
