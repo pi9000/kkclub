@@ -150,6 +150,16 @@ class SettingController extends Controller
                 'proxied' => true
             ]);
 
+
+        Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+            ->post(env('CLOUDFLARE_API_BASE') . "/zones/{$zone['id']}/dns_records", [
+                'type' => 'A',
+                'name' => "www.$domain",
+                'content' => '194.233.71.101',
+                'ttl' => 3600,
+                'proxied' => true
+            ]);
+
         $domainList = new DomainList();
         $domainList->agent_id = $tenantId;
         $domainList->domain = $domain;
@@ -197,6 +207,7 @@ server {
             shell_exec("ln -s $nginxAvailablePath $nginxEnabledPath");
         }
 
+        shell_exec("sudo nginx -t 2>&1");
         shell_exec("sudo systemctl reload nginx");
         shell_exec("sudo certbot --nginx -d $domain");
 
