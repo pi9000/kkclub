@@ -15,7 +15,7 @@ class Transaction extends Model
         return $this->belongsTo(User::class, 'id_user', 'id');
     }
 
-    public function Bonus()
+    public function Bonuse()
     {
         return $this->belongsTo(Bonus::class, 'bonus', 'id');
     }

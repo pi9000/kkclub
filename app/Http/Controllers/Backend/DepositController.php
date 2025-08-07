@@ -32,7 +32,7 @@ class DepositController extends Controller
             $query->where('status', $request->status);
         }
 
-        $transactions = $query->where('agent_id', $request->agent_id)->with('user')->with('bonus')->get();
+        $transactions = $query->where('agent_id', $request->agent_id)->with('user')->with('bonuse')->get();
 
         return response()->json([
             'status' => 'success',
@@ -43,7 +43,7 @@ class DepositController extends Controller
     }
     public function index(Request $request)
     {
-        $transaction = Transaction::with('user')->with('bonus')->where('agent_id', $request->agent_id)
+        $transaction = Transaction::with('user')->with('bonuse')->where('agent_id', $request->agent_id)
             ->when($request->username, function ($query) use ($request) {
                 $query->where('username', 'like', '%' . $request->username . '%');
             })
@@ -62,7 +62,7 @@ class DepositController extends Controller
 
     public function get_transaction($id)
     {
-        $transaction = Transaction::with('user')->with('bonus')->where('trx_id', $id)->first();
+        $transaction = Transaction::with('user')->with('bonuse')->where('trx_id', $id)->first();
 
         if (!$transaction) {
             return response()->json([
