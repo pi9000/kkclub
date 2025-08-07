@@ -37,8 +37,8 @@ class DepositController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $transactions,
-            'sum_debit' => $transactions->where('transaksi','Withdraw')->where('status','Sukses')->sum('total'),
-            'sum_credit' => $transactions->where('transaksi','Top Up')->where('status','Sukses')->sum('total'),
+            'sum_debit' => $transactions->where('transaksi', 'Withdraw')->where('status', 'Sukses')->sum('total'),
+            'sum_credit' => $transactions->where('transaksi', 'Top Up')->where('status', 'Sukses')->sum('total'),
         ]);
     }
     public function index(Request $request)
@@ -134,7 +134,7 @@ class DepositController extends Controller
         ]);
     }
 
-        public function approve($id, Request $request)
+    public function approve($id, Request $request)
     {
         $transaction = Transaction::where('trx_id', $id)
             ->where('status', 'Pending')
@@ -166,6 +166,7 @@ class DepositController extends Controller
             $transaction->status = 'Sukses';
             $transaction->save();
 
+            // Proses penambahan saldo
             if ($transaction->transaksi === 'Top Up') {
                 if ($transaction->dari_bank === 'Main Balance') {
                     $user->balance += $transaction->total;
