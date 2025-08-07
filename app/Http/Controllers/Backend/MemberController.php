@@ -195,9 +195,6 @@ class MemberController extends Controller
                 'message' => 'Invalid Member',
             ]);
         }
-        $reffs = Refferal::where('user_id', $user->id)->first();
-        $reff = Refferal::where('upline', $reffs->reff_code)->with('User')->get();
-        $reffc = Refferal::where('upline', $reffs->reff_code)->count();
         $transaction = Transaction::where('id_user', $user->id)->get();
         $ball = DB::table('trans_balls')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         $banks = DB::table('bank_lists')->get();
@@ -207,9 +204,6 @@ class MemberController extends Controller
             'status' => 1,
             'message' => 'Success',
             'user' => $user,
-            'reffs' => $reffs,
-            'reff' => $reff,
-            'reff_count' => $reffc,
             'transaction' => $transaction,
             'banks' => $banks,
             'ball' => $ball,
