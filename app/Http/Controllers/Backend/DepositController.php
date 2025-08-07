@@ -137,7 +137,6 @@ class DepositController extends Controller
     public function approve($id, Request $request)
     {
         $transaction = Transaction::where('trx_id', $id)->first();
-        $bonus = Bonus::find($transaction->bonus);
         $user = User::find($transaction->id_user);
 
         $transaction->transaction_by = $request->transaction_by;
@@ -148,15 +147,16 @@ class DepositController extends Controller
             if ($transaction->dari_bank == 'Main Balance') {
                 $user->balance = $user->balance + $transaction->total;
             } else {
+                $bonus = Bonus::find($transaction->bonus);
                 if (!empty($bonus)) {
                     $bonust =  $transaction->total * $bonus->bonus / 100;
                     if ($bonust > $bonus->max) {
-                        $totals =  $bonus->max;
+                        $totals = $transaction->total + $bonus->max;
                     } else {
                         $totals = $transaction->total + $bonust;
                     }
                 } else {
-                    $totals =  $transaction->total;
+                    $totals = $transaction->total;
                 }
                 $user->balance = $user->balance + $totals;
             }
