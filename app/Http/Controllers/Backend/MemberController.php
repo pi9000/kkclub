@@ -197,7 +197,6 @@ class MemberController extends Controller
         }
         $transaction = Transaction::where('id_user', $user->id)->get();
         $ball = DB::table('trans_balls')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
-        $banks = DB::table('bank_lists')->get();
         $game_history = GameHistory::where('extplayer', $extplayer)->get();
 
         return response()->json([
@@ -205,7 +204,6 @@ class MemberController extends Controller
             'message' => 'Success',
             'user' => $user,
             'transaction' => $transaction,
-            'banks' => $banks,
             'ball' => $ball,
             'game_history' => $game_history,
             'game_history_win' => $game_history->sum('win_amount'),
