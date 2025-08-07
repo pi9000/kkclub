@@ -173,12 +173,6 @@ class MemberController extends Controller
             ]);
         }
 
-        $reffs = new Refferal();
-        $reffs->user_id = $user->id;
-        $reffs->reff_code = getReff();
-        $reffs->upline = $request->ref_id;
-        $reffs->save();
-
         return response()->json([
             'status' => 'success',
             'message' => 'User ' . $user->username . ' Successfully created',
