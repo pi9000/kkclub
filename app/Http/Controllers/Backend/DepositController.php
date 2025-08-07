@@ -32,7 +32,7 @@ class DepositController extends Controller
             $query->where('status', $request->status);
         }
 
-        $transactions = $query->where('agent_id', $request->agent_id)->with('user')->get();
+        $transactions = $query->where('agent_id', $request->agent_id)->with('user')->with('bonus')->get();
 
         return response()->json([
             'status' => 'success',
@@ -43,7 +43,7 @@ class DepositController extends Controller
     }
     public function index(Request $request)
     {
-        $transaction = Transaction::with('user')->where('agent_id', $request->agent_id)
+        $transaction = Transaction::with('user')->with('bonus')->where('agent_id', $request->agent_id)
             ->when($request->username, function ($query) use ($request) {
                 $query->where('username', 'like', '%' . $request->username . '%');
             })
@@ -62,7 +62,7 @@ class DepositController extends Controller
 
     public function get_transaction($id)
     {
-        $transaction = Transaction::with('user')->where('trx_id', $id)->first();
+        $transaction = Transaction::with('user')->with('bonus')->where('trx_id', $id)->first();
 
         if (!$transaction) {
             return response()->json([
@@ -139,7 +139,6 @@ class DepositController extends Controller
         $transaction = Transaction::where('trx_id', $id)->first();
         $bonus = Bonus::find($transaction->bonus);
         $user = User::find($transaction->id_user);
-        $bank = Bank::where('nama_bank', $transaction->metode)->where('level', 'admin')->first();
 
         $transaction->transaction_by = $request->transaction_by;
         $transaction->status = 'Sukses';
@@ -148,7 +147,6 @@ class DepositController extends Controller
         if ($transaction->transaksi == 'Top Up') {
             if ($transaction->dari_bank == 'Main Balance') {
                 $user->balance = $user->balance + $transaction->total;
-                $user->save();
             } else {
                 if (!empty($bonus)) {
                     $bonust =  $transaction->total * $bonus->bonus / 100;
@@ -161,16 +159,13 @@ class DepositController extends Controller
                     $totals =  $transaction->total;
                 }
                 $user->balance = $user->balance + $totals;
-                $user->save();
             }
         } else {
             if ($transaction->metode == 'Main Wallet') {
-                $user = User::find($transaction->id_user);
-
                 $user->balance = $user->balance + $transaction->total;
-                $user->save();
             }
         }
+        $user->save();
 
         return response()->json([
             'status' => 'success',
@@ -192,12 +187,11 @@ class DepositController extends Controller
         if ($transaction->transaksi == 'Top Up') {
             if ($transaction->dari_bank == 'Main Balance') {
                 $user->balance = $transaction->total;
-                $user->save();
             }
         } else {
             $user->balance = $user->balance + $transaction->total;
-            $user->save();
         }
+        $user->save();
 
         return response()->json([
             'status' => 'success',
