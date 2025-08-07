@@ -84,6 +84,13 @@ Route::namespace('Backend')->prefix('bo/v2')->name('admin.')->group(function () 
         Route::post('games/call_rtp', 'ProviderController@call_rtp')->name('calls.call_rtp');
 
         Route::post('brand_management', 'SettingController@brand_management')->name('brand_management');
+        Route::post('brand_management/create', 'SettingController@create_brand')->name('create_brand');
+        Route::post('brand_management/{id}/delete', 'SettingController@delete_brand')->name('delete_brand');
+
+        Route::post('provider_list', 'ProviderController@provider_list')->name('provider_list');
+        Route::post('provider_list/update_provider', 'ProviderController@update_provider')->name('provider_list.update');
+        Route::post('provider_list/game_lists/{id}', 'ProviderController@gamelists')->name('provider_list.game_lists');
+        Route::post('provider_list/game_lists/{id}/update', 'ProviderController@update_games')->name('provider_list.update_games');
     });
 
     Route::get('config-clear', function () {

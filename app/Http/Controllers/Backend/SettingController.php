@@ -8,9 +8,12 @@ use App\Models\Settings;
 use Illuminate\Support\Facades\Http;
 use App\Models\Contact;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\ApiProvider;
 use App\Models\DomainList;
 use App\Models\Banner;
+use App\Models\User;
+use App\Models\Bonus;
 use Illuminate\Support\Facades\File;
 
 class SettingController extends Controller
@@ -244,11 +247,105 @@ server {
 
     public function brand_management(Request $request)
     {
-        $settings = Settings::where('agent_id', $request->agent_id)->get();
+        $settings = Settings::get();
 
         return response()->json([
             'status' => 'success',
             'data' => $settings
         ]);
+    }
+
+    public function create_brand(Request $request)
+    {
+        $settings = Settings::first();
+        $web = new Settings();
+        $web->agent_id = strtoupper(Str::random(7));
+        $web->logo = $settings->logo;
+        $web->min_depo = $settings->min_depo;
+        $web->min_wd = $settings->min_wd;
+        $web->title = $settings->title;
+        $web->judul = $request->title;
+        $web->deskripsi = $settings->deskripsi;
+        $web->keyword = $settings->keyword;
+        $web->icon_web = $settings->icon_web;
+        $web->notif_bar = $settings->notif_bar;
+        $web->tutorial_withdraw = $settings->tutorial_withdraw;
+        $web->tutorial_register = $settings->tutorial_register;
+        $web->tutorial_deposit = $settings->tutorial_deposit;
+        $web->home_footer = $settings->home_footer;
+        $web->gateway_merchant =  '-';
+        $web->gateway_apikey =  '-';
+        $web->gateway_secretkey = '-';
+        $web->gateway_endpoint = $settings->gateway_endpoint;
+        $web->telegram_chat_id =  '-';
+        $web->costum_script = $settings->costum_script;
+        $web->url = $settings->url;
+        $web->warna = $settings->warna;
+        $web->warna = $settings->warna;
+        $web->save();
+
+        $api_nexus = ApiProvider::find(1);
+        $api_reviplay = ApiProvider::find(2);
+
+        $contact_old = Contact::first();
+
+        $contact = new Contact();
+        $contact->agent_id = $web->agent_id;
+        $contact->no_whatsapp = $contact_old->no_whatsapp;
+        $contact->script = $contact_old->script;
+        $contact->save();
+
+        $new_nexus = new ApiProvider();
+        $new_nexus->agent_id = $web->agent_id;
+        $new_nexus->provider = $api_nexus->provider;
+        $new_nexus->type = $api_nexus->type;
+        $new_nexus->apikey = $request->apikey_nexusggr;
+        $new_nexus->agentcode = $request->agentcode_nexusggr;
+        $new_nexus->secretkey = $request->secretkey_nexusggr;
+        $new_nexus->token = $request->secretkey_nexusggr;
+        $new_nexus->url = $api_nexus->url;
+        $new_nexus->status = $api_nexus->status;
+        $new_nexus->save();
+
+        $new_reviplay = new ApiProvider();
+        $new_reviplay->agent_id = $web->agent_id;
+        $new_reviplay->provider = $api_reviplay->provider;
+        $new_reviplay->type = $api_reviplay->type;
+        $new_reviplay->apikey = $request->apikey_reviplay;
+        $new_reviplay->agentcode = $request->agentcode_reviplay;
+        $new_reviplay->secretkey = $request->secretkey_reviplay;
+        $new_reviplay->token = $request->secretkey_reviplay;
+        $new_reviplay->url = $api_reviplay->url;
+        $new_reviplay->status = $api_reviplay->status;
+        $new_reviplay->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Brand Successfully created',
+            'agent_id' => $web->agent_id
+        ]);
+    }
+
+    public function delete_brand($id, Request $request)
+    {
+        $check = Settings::where('agent_id', $id)->first();
+        if ($check->id == 1) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot delete the main brand',
+            ], 200);
+        }
+
+        ApiProvider::where('agent_id', $id)->delete();
+        Settings::where('agent_id', $id)->delete();
+        Contact::where('agent_id', $id)->delete();
+        Banner::where('agent_id', $id)->delete();
+        DomainList::where('agent_id', $id)->delete();
+        Bonus::where('agent_id', $id)->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Brand Successfully deleted',
+        ], 200);
     }
 }

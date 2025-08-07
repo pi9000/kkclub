@@ -74,7 +74,7 @@ class RegisterController extends Controller
         $otp = new VerificationController();
         $username = preg_replace("/[^a-zA-Z0-9]+/", "", $data['username']);
         $user = User::create([
-            'extplayer' => strtoupper(general()->agent_id . random_string(5)),
+            'extplayer' => strtoupper(general()->agent_id . random_string(4)),
             'agent_id' => general()->agent_id,
             'username' => strtolower($username),
             'password' => Hash::make($data['password']),

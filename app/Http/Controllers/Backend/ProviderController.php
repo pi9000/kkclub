@@ -33,7 +33,7 @@ class ProviderController extends Controller
     public function call_apply(Request $request)
     {
         $api = new SeamlesWsController();
-        $playing = $api->call_apply($request->agent_id,$request->providerCode, $request->gameCode, $request->userCode, $request->callRtp, $request->callType);
+        $playing = $api->call_apply($request->agent_id, $request->providerCode, $request->gameCode, $request->userCode, $request->callRtp, $request->callType);
 
         return $playing;
     }
@@ -41,7 +41,7 @@ class ProviderController extends Controller
     public function call_rtp(Request $request)
     {
         $api = new SeamlesWsController();
-        $playing = $api->control_rtp($request->agent_id,$request->providerCode, $request->userCode, $request->rtp);
+        $playing = $api->control_rtp($request->agent_id, $request->providerCode, $request->userCode, $request->rtp);
 
         return $playing;
     }
@@ -83,7 +83,10 @@ class ProviderController extends Controller
     public function provider_list(Request $request)
     {
         $provider = Provider::orderBy('status', 'DESC')->get();
-        return view('backend.provider.list', compact('provider'));
+        return response()->json([
+            'status' => 'success',
+            'data' => $provider
+        ]);
     }
 
     public function delete_provider($id, Request $request)
@@ -102,46 +105,33 @@ class ProviderController extends Controller
             $provider->banner = $request->banner;
             $provider->status = $request->status;
             $provider->save();
-            return back()->with('success', 'Provider updated successfully.');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Provider updated successfully.'
+            ], 200);
         }
 
-        return back()->with('error', 'Provider not found.');
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Provider not found'
+        ], 200);
     }
 
     public function gamelists($id, Request $request)
     {
         $provider = Provider::find($id);
         if (!$provider) {
-            return back()->with('error', 'Provider not found');
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Provider not found'
+            ], 200);
         }
+        $data = GameList::where('Provider', $provider->provider)->where('provider_id', $provider->provider_id)->orderBy('sequence', 'ASC')->get();
 
-
-        if ($request->ajax()) {
-            $user = GameList::where('Provider', $provider->provider)->where('provider_id', $provider->provider_id)->orderBy('sequence', 'ASC');
-            return DataTables::of($user)
-                ->addIndexColumn()
-                ->addColumn('created_at', function ($row) {
-                    $cbtrn = $row->created_at;
-                    return $cbtrn;
-                })
-                ->addColumn('provider_api', function ($row) {
-                    $cbtrn = api_providers($row->provider_id);
-                    return $cbtrn;
-                })
-                ->addColumn('Game_image', function ($row) {
-                    $statusbtn = '<img src="' . $row->Game_image . '" class="img-fluid" style="max-width: 100px; max-height: 100px;">';
-                    return $statusbtn;
-                })
-                ->addColumn('action', function ($row) {
-                    $action = '<button type="button" class="btn btn-xs btn-primary" onclick="handleCallModal(`' . $row->id . '`,`' . $row->Provider . '`,`' . $row->GameName . '`,`' . $row->GameCode . '`,`' . $row->Game_image . '`,`' . $row->sequence . '`)">
-                                            <span class="mdi mdi-pencil">
-                                        </button>';
-                    return $action;
-                })
-                ->rawColumns(['created_at', 'provider_api', 'Game_image', 'action'])
-                ->make(true);
-        }
-        return view('backend.provider.game');
+        return response()->json([
+            'status' => 'success',
+            'data' => $data
+        ], 200);
     }
 
     public function update_games(Request $request)
@@ -154,7 +144,7 @@ class ProviderController extends Controller
             ]);
         }
 
-        $games->Game_image = $request->Game_image;
+        $games->Game_image = $request->game_image;
         $games->sequence = $request->sequence;
         $games->save();
 
