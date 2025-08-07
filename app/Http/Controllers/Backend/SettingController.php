@@ -145,7 +145,7 @@ class SettingController extends Controller
             ->post(env('CLOUDFLARE_API_BASE') . "/zones/{$zone['id']}/dns_records", [
                 'type' => 'A',
                 'name' => $domain,
-                'content' => '123.123.123.123',
+                'content' => '194.233.71.101',
                 'ttl' => 3600,
                 'proxied' => true
             ]);
