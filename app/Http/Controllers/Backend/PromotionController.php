@@ -40,6 +40,7 @@ class PromotionController extends Controller
         $promotion->status = $request->status;
         $promotion->type = $request->type;
         $promotion->sequence = $request->sequence;
+        $promotion->turnover = $request->to;
         $promotion->save();
         return response()->json([
             'status' => 1,
