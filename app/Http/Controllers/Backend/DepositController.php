@@ -134,71 +134,129 @@ class DepositController extends Controller
         ]);
     }
 
-    public function approve($id, Request $request)
+        public function approve($id, Request $request)
     {
-        $transaction = Transaction::where('trx_id', $id)->first();
-        $user = User::find($transaction->id_user);
+        $transaction = Transaction::where('trx_id', $id)
+            ->where('status', 'Pending')
+            ->first();
 
-        $transaction->transaction_by = $request->transaction_by;
-        $transaction->status = 'Sukses';
-        $transaction->save();
-
-        if ($transaction->transaksi == 'Top Up') {
-            if ($transaction->dari_bank == 'Main Balance') {
-                $user->balance = $user->balance + $transaction->total;
-            } else {
-                $bonus = Bonus::find($transaction->bonus);
-                if (!empty($bonus)) {
-                    $bonust =  $transaction->total * $bonus->bonus / 100;
-                    if ($bonust > $bonus->max) {
-                        $totals = $transaction->total + $bonus->max;
-                    } else {
-                        $totals = $transaction->total + $bonust;
-                    }
-                } else {
-                    $totals = $transaction->total;
-                }
-                $user->balance = $user->balance + $totals;
-            }
-        } else {
-            if ($transaction->metode == 'Main Wallet') {
-                $user->balance = $user->balance + $transaction->total;
-            }
+        if (!$transaction) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaction not found or already processed.',
+            ], 404);
         }
-        $user->save();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Transaction completed successfully.',
-            'transaction' => $transaction->transakasi,
-            'amount' => $transaction->total,
-        ]);
+        $user = User::find($transaction->id_user);
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        $bonus = null;
+        if ($transaction->bonus) {
+            $bonus = Bonus::find($transaction->bonus);
+        }
+
+        DB::beginTransaction();
+        try {
+            $transaction->transaction_by = $request->transaction_by;
+            $transaction->status = 'Sukses';
+            $transaction->save();
+
+            if ($transaction->transaksi === 'Top Up') {
+                if ($transaction->dari_bank === 'Main Balance') {
+                    $user->balance += $transaction->total;
+                } else {
+                    $bonusAmount = 0;
+
+                    if ($bonus) {
+                        $calculatedBonus = $transaction->total * $bonus->bonus / 100;
+                        $bonusAmount = min($calculatedBonus, $bonus->max);
+                    }
+
+                    $totalCredit = $transaction->total + $bonusAmount;
+                    $user->balance += $totalCredit;
+                }
+            } else {
+                if ($transaction->metode === 'Main Wallet') {
+                    $user->balance += $transaction->total;
+                }
+            }
+
+            $user->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction approved successfully.',
+                'transaction' => $transaction->transaksi,
+                'amount' => $transaction->total,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function reject($id, Request $request)
     {
-        $transaction = Transaction::where('trx_id', $id)->first();
+        $transaction = Transaction::where('trx_id', $id)->where('status', 'Pending')->first();
 
-        $transaction->status = 'Ditolak';
-        $transaction->transaction_by = $request->transaction_by;
-        $transaction->save();
-        $user = User::find($transaction->id_user);
-
-        if ($transaction->transaksi == 'Top Up') {
-            if ($transaction->dari_bank == 'Main Balance') {
-                $user->balance = $transaction->total;
-            }
-        } else {
-            $user->balance = $user->balance + $transaction->total;
+        if (!$transaction) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaction not found.',
+            ], 404);
         }
-        $user->save();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Transaction completed successfully.',
-            'transaction' => $transaction->transakasi,
-            'amount' => $transaction->total,
-        ]);
+        $user = User::find($transaction->id_user);
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            $transaction->status = 'Ditolak';
+            $transaction->transaction_by = $request->transaction_by;
+            $transaction->save();
+
+            if ($transaction->transaksi == 'Top Up') {
+                if ($transaction->dari_bank == 'Main Balance') {
+                    $user->balance = $transaction->total;
+                }
+            } else {
+                $user->balance += $transaction->total;
+            }
+
+            $user->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction rejected successfully.',
+                'transaction' => $transaction->transaksi,
+                'amount' => $transaction->total,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function reload_payment(Request $request)
