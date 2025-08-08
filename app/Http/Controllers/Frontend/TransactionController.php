@@ -60,6 +60,7 @@ class TransactionController extends Controller
             };
             return [
                 'amount' => number_format($item->total, 2),
+                'notes' => $item->metode,
                 'status' => $statusText,
                 'class' => strtolower($statusText),
                 'datetime' => Carbon::parse($item->created_at)->format('d-m-Y H:i'),
@@ -80,6 +81,7 @@ class TransactionController extends Controller
             };
             return [
                 'amount' => number_format($item->total, 2),
+                'notes' => $item->metode,
                 'status' => $statusText,
                 'class' => strtolower($statusText),
                 'datetime' => Carbon::parse($item->created_at)->format('d-m-Y H:i'),

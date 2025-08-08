@@ -98,7 +98,7 @@
 
         var data = @json($history),
             filter = [],
-            cols = ["Amount", "Status", "Date"];
+            cols = ["Amount","Notes", "Status", "Date"];
         const maxRow = 20;
         createRecordFilter(filter);
         setupTable(data);

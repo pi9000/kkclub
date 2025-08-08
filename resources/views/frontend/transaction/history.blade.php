@@ -27,12 +27,13 @@
                                 <tr>
                                     <th>@lang('public.date')</th>
                                     <th>@lang('public.history_amount')</th>
+                                    <th>Notes</th>
                                     <th>@lang('public.history_status')</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="3" style="text-align: center;">@lang('public.history_no_data')</td>
+                                    <td colspan="4" style="text-align: center;">@lang('public.history_no_data')</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -98,7 +99,7 @@
 
         var data = @json($history),
             filter = [],
-            cols = ["Amount", "Status", "Date"];
+            cols = ["Amount","Notes", "Status", "Date"];
         const maxRow = 20;
         createRecordFilter(filter);
         setupTable(data);
