@@ -307,8 +307,6 @@ class HomeController extends Controller
                 $trans->username = auth()->user()->username;
                 $trans->save();
 
-                $end = new SeamlesWsController();
-                $end->withdraw(auth()->user()->extplayer, auth()->user()->balance);
                 return response()->json([
                     'status' => 'success',
                     'msg' => __('public.apk_transfer_success')
