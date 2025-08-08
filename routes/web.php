@@ -21,6 +21,7 @@ Route::namespace('Backend')->prefix('api/bo/v2')->name('admin.')->group(function
         Route::post('get_member_total_balance', 'DashboardController@get_member_total_balance')->name('get_member_total_balance');
 
         Route::post('account_listing', 'MemberController@account_listing')->name('members.account_listing');
+        Route::post('update_balance', 'MemberController@edit_balance')->name('update_balance');
         Route::post('member_details/{id}', 'MemberController@member_details')->name('members.member_details');
         Route::post('transaction_history/{id}', 'MemberController@transaction_history')->name('members.transaction_history');
         Route::post('member_details/{id}/balance', 'MemberController@member_details_balance')->name('members.member_details_balance');

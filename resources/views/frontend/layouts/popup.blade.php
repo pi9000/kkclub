@@ -69,11 +69,19 @@
                             <div class="copy"><span>Copy</span></div>
                         </div>
                     </div>
+
+                    <div class="input-field default mx-w mb-15 amount_wd_games" style="display: none;">
+                        <div class="input-label">Amount: </div>
+                        <input id="game-acc-amount" type="number" class="default" name="amount">
+                        <input id="game-game-id" name="game_id" style="display: none;">
+                    </div>
                 </form>
                 <div id="game-notice"></div>
                 <div class="game-action-wrap">
                     <button type="button" class="btn btn-action" id="btn-deposit-apk">Transfer credits to
                         game</button>
+                    <button type="button" class="btn btn-action" id="btn-withdraw-apk">Withdraw Credit To Main Wallet</button>
+                    <button type="button" class="btn btn-action" id="btn-withdraw-apk-submit" style="display: none;">Withdraw Credit</button>
                     <a class="btn" id="btn-download">Download</a>
                 </div>
             </section>

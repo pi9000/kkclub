@@ -490,6 +490,54 @@
 <script src="{{ asset('new_assets/js/script.js') }}"></script>
 @stack('script')
 <script>
+    $(document).ready(function() {
+        $('#btn-withdraw-apk-submit').on('click', function() {
+            const game_acc = $('#game-acc-id').val();
+            const game_ps = $('#game-acc-ps').val();
+            const game_wd_amt = $('#game-acc-amount').val();
+            const game_id = $('#game-game-id').val();
+
+            if (game_wd_amt < 3) {
+                setSwal(0, 'Minimum withdrawal amount is 3', 2000);
+                $('#game-acc-amount').focus();
+                return;
+            }
+
+
+            $('#btn-withdraw-apk-submit').prop('disabled', true);
+            showLoading();
+
+            var postData = {
+                game_id: game_id,
+                game_acc: game_acc,
+                game_ps: game_ps,
+                amount: game_wd_amt,
+                type: 1,
+                _token: '{{ csrf_token() }}',
+            };
+            $.ajax({
+                url: "{{ url('apk_game_deposit') }}",
+                method: 'POST',
+                data: postData,
+                success: function(data) {
+                    closePopup('apk-game-info');
+                    hideLoading();
+                    if (data.success) {
+                        setSwal(1, data.msg, 3500);
+                    } else {
+                        setSwal(0, data.msg, 5000);
+                    }
+                    $('#btn-withdraw-apk-submit').prop('disabled', false);
+                    $('.amount_wd_games').hide();
+                    $('#btn-deposit-apk').show();
+                    $('#btn-withdraw-apk').show();
+                    $('#btn-withdraw-apk-submit').hide();
+                    $('.amount_wd_games').prop('required', false);
+                },
+            })
+        });
+    });
+
     function deposit_game(game_id) {
         showLoading();
         document.getElementById('btn-deposit-apk').disabled = true;
@@ -500,6 +548,7 @@
             game_id: game_id,
             game_acc: game_acc,
             game_ps: game_ps,
+            type: 2,
             _token: '{{ csrf_token() }}',
         };
         $.ajax({
@@ -520,6 +569,15 @@
                 document.getElementById('btn-deposit-apk').disabled = false;
             },
         })
+    }
+
+    function withdraw_game(id) {
+        $('.amount_wd_games').show();
+        $('#btn-deposit-apk').hide();
+        $('#btn-withdraw-apk').hide();
+        $('#btn-withdraw-apk-submit').show();
+        $('#game-game-id').val(id);
+        $('.amount_wd_games').prop('required', true);
     }
 </script>
 @stack('footer')

@@ -249,7 +249,7 @@ class HomeController extends Controller
                 'status' => 'success',
                 'msg' => __('public.apk_transfer_success')
             ]);
-        } else {
+        } else if ($request->type == 2) {
             $check = DB::table('tb_transaksi')->where('id_user', auth()->user()->id)->where('transaksi', 'Top Up')->where('dari_bank', 'Main Balance')->where('status', 'Pending')->first();
             if (!empty($check)) {
                 return response()->json([
@@ -287,6 +287,11 @@ class HomeController extends Controller
             curl_close($ch);
             $result = json_decode($response, true);
             if ($result['ok']) {
+
+                $user = User::find(auth()->user()->id);
+                $user->balance = 0;
+                $user->save();
+
                 $trans = new Transaction();
                 $trans->agent_id = auth()->user()->agent_id;
                 $trans->trx_id = getTrx();
@@ -296,7 +301,7 @@ class HomeController extends Controller
                 $trans->metode = $request->provider . ' APK Balance';
                 $trans->bonus = 'tanpabonus';
                 $trans->bonus_amount = 0;
-                $trans->keterangan = 'Transfer Credit To Games Account : ' . $request->id_game;
+                $trans->keterangan = 'Transfer Credit To Games Account : ' . $request->game_id;
                 $trans->status = 'Pending';
                 $trans->id_user = auth()->user()->id;
                 $trans->username = auth()->user()->username;
@@ -309,6 +314,56 @@ class HomeController extends Controller
                     'msg' => __('public.apk_transfer_success')
                 ]);
             }
+        } else {
+            $check = DB::table('tb_transaksi')->where('id_user', auth()->user()->id)->where('transaksi', 'Withdraw')->where('metode', 'Main Wallet')->where('agent_id', general()->agent_id)->where('status', 'Pending')->first();
+            if (!empty($check)) {
+                return response()->json([
+                    'status' => 'error',
+                    'msg' => __('public.pend_trans')
+                ]);
+            }
+
+            $chatID = general()->telegram_chat_id;
+            $token  = env('TELEGRAM_BOT_TOKEN');
+            $message = '<b>‼️‼️‼️ Request Withdraw Balance To Main Wallet</b>
+
+<b>Username</b> : <code>' . auth()->user()->username . '</code>
+<b>Amount</b> : ' . number_format($request->amount, 2) . '
+<b>Provider</b> : ' . $request->provider . '
+<b>Date</b> : ' . date('Y-m-d H:i:s') . '';
+
+            $url = "https://api.telegram.org/bot" . $token . "/sendMessage";
+
+            $data = ['chat_id' => $chatID, 'text' => $message, 'parse_mode' => 'HTML'];
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+            $result = json_decode($response, true);
+            if ($result['ok']) {
+                $trans = new Transaction();
+                $trans->trx_id = getTrx();
+                $trans->agent_id = auth()->user()->agent_id;
+                $trans->transaksi = 'Withdraw';
+                $trans->total = $request->amount;
+                $trans->dari_bank = $request->provider . ' APK Balance';
+                $trans->metode = 'Main Wallet';
+                $trans->bonus = 'tanpabonus';
+                $trans->bonus_amount = 0;
+                $trans->keterangan = 'Withdraw Credit Games Account : ' . $request->game_id . ' To Main Wallet';
+                $trans->status = 'Pending';
+                $trans->id_user = auth()->user()->id;
+                $trans->username = auth()->user()->username;
+                $trans->save();
+            }
+            return response()->json([
+                'status' => 'success',
+                'msg' => __('public.apk_withdraw_success')
+            ]);
         }
     }
 }

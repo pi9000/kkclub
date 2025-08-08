@@ -149,6 +149,10 @@ href="{{ route('login') }}" @endguest>
                 deposit_game(event.target.getAttribute('game'));
             });
 
+            document.getElementById('btn-withdraw-apk').addEventListener('click', (event) => {
+                withdraw_game(event.target.getAttribute('game'));
+            });
+
             document.querySelectorAll('.close-sticky').forEach((x) => {
                 x.addEventListener('click', () => {
                     const parent = x.closest('.sticky-element');
