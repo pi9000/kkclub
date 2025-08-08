@@ -522,7 +522,7 @@
                 success: function(data) {
                     closePopup('apk-game-info');
                     hideLoading();
-                    if (data.success) {
+                    if (data.status == 'success') {
                         setSwal(1, data.msg, 3500);
                     } else {
                         setSwal(0, data.msg, 5000);
@@ -558,7 +558,7 @@
             success: function(data) {
                 closePopup('apk-game-info');
                 hideLoading();
-                if (data.success) {
+                if (data.status == 'success') {
                     setSwal(1, data.msg, 3500);
                     if (data.open_game_link != null) {
                         window.location.href = data.open_game_link;
