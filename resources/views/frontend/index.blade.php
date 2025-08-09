@@ -336,77 +336,137 @@ href="{{ route('login') }}" @endguest>
         function getRandomName() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             const numbers = '0123456789';
-            const prefix = chars[Math.floor(Math.random() * chars.length)] + chars[Math.floor(Math.random() * chars
-                .length)];
+            const prefix = chars[Math.floor(Math.random() * chars.length)] + chars[Math.floor(Math.random() * chars.length)];
             const suffix = numbers[Math.floor(Math.random() * 10)] + numbers[Math.floor(Math.random() * 10)];
             const middle = '*'.repeat(4);
             return `${prefix}${middle}${suffix}`;
         }
-
-        function getRandomAmount() {
-            const amounts = [10, 20, 30, 40, 50, 100, 150, 200, 250];
-            return `RM ${amounts[Math.floor(Math.random() * amounts.length)].toFixed(2)}`;
+    
+        function getFormattedLocalDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         }
-
-        function getCurrentFormattedDate() {
+    
+        function generateSortedTimestamps(count, minMinutesAgo = 5, maxMinutesAgo = 10) {
             const now = new Date();
-            return now.toISOString().replace('T', ' ').substring(0, 19);
+            const timestamps = [];
+    
+            for (let i = 0; i < count; i++) {
+                const minutesAgo = Math.random() * (maxMinutesAgo - minMinutesAgo) + minMinutesAgo;
+                const timestamp = new Date(now.getTime() - minutesAgo * 60 * 1000);
+                timestamps.push(timestamp);
+            }
+    
+            // Sort from NEWEST to OLDEST
+            return timestamps.sort((a, b) => b - a);
         }
-
+    
+        function getWeightedRandomAmount(ranges) {
+            const rand = Math.random() * 100;
+            let selectedRange;
+    
+            if (rand < 30) selectedRange = ranges[0];       // 30%
+            else if (rand < 85) selectedRange = ranges[1];  // 55%
+            else if (rand < 92) selectedRange = ranges[2];  // 7%
+            else if (rand < 97) selectedRange = ranges[3];  // 5%
+            else selectedRange = ranges[4];                 // 3%
+    
+            const min = selectedRange.min;
+            const max = selectedRange.max;
+            const step = 10;
+    
+            const random = Math.floor((Math.random() * ((max - min) / step + 1))) * step + min;
+            return `RM ${random.toFixed(2)}`;
+        }
+    
+        function getRandomDepositAmount() {
+            const ranges = [
+                { min: 30, max: 70 },
+                { min: 70, max: 200 },
+                { min: 200, max: 500 },
+                { min: 500, max: 1000 },
+                { min: 1000, max: 2000 },
+            ];
+            return getWeightedRandomAmount(ranges);
+        }
+    
+        function getRandomWithdrawalAmount() {
+            const ranges = [
+                { min: 50, max: 70 },
+                { min: 70, max: 200 },
+                { min: 200, max: 500 },
+                { min: 500, max: 1000 },
+                { min: 1000, max: 30000 },
+            ];
+            return getWeightedRandomAmount(ranges);
+        }
+    
         function generateFakeTransactions() {
             const tableBody = document.querySelector("#latest-deposit-wrapper tbody");
-            tableBody.innerHTML = ''; // clear before regenerate
-
-            for (let i = 0; i < 5; i++) {
+            tableBody.innerHTML = '';
+    
+            const timestamps = generateSortedTimestamps(5, 5, 10); // NEWEST → OLDEST from last 5–10 mins
+    
+            timestamps.forEach(date => {
                 const row = document.createElement("tr");
-
+    
                 const nameCell = document.createElement("td");
                 nameCell.textContent = getRandomName();
-
+    
                 const amountCell = document.createElement("td");
-                amountCell.textContent = getRandomAmount();
-
+                amountCell.textContent = getRandomDepositAmount();
+    
                 const dateCell = document.createElement("td");
-                dateCell.textContent = getCurrentFormattedDate();
-
+                dateCell.textContent = getFormattedLocalDate(date);
+    
                 row.appendChild(nameCell);
                 row.appendChild(amountCell);
                 row.appendChild(dateCell);
-
+    
                 tableBody.appendChild(row);
-            }
+            });
         }
-
+    
         function generateFakeTransactionsWd() {
             const tableBody = document.querySelector("#latest-withdraw-wrapper tbody");
-            tableBody.innerHTML = ''; // clear before regenerate
-
-            for (let i = 0; i < 5; i++) {
+            tableBody.innerHTML = '';
+    
+            const timestamps = generateSortedTimestamps(5, 5, 10); // NEWEST → OLDEST from last 5–10 mins
+    
+            timestamps.forEach(date => {
                 const row = document.createElement("tr");
-
+    
                 const nameCell = document.createElement("td");
                 nameCell.textContent = getRandomName();
-
+    
                 const amountCell = document.createElement("td");
-                amountCell.textContent = getRandomAmount();
-
+                amountCell.textContent = getRandomWithdrawalAmount();
+    
                 const dateCell = document.createElement("td");
-                dateCell.textContent = getCurrentFormattedDate();
-
+                dateCell.textContent = getFormattedLocalDate(date);
+    
                 row.appendChild(nameCell);
                 row.appendChild(amountCell);
                 row.appendChild(dateCell);
-
+    
                 tableBody.appendChild(row);
-            }
+            });
         }
-        setInterval(() => {
+    
+        function runGeneratorsAndReschedule() {
             generateFakeTransactions();
             generateFakeTransactionsWd();
-        }, 5000);
-        // Auto-generate on load
-        generateFakeTransactions();
-        generateFakeTransactionsWd();
+    
+            const nextInterval = Math.floor(Math.random() * (10 - 5 + 1) + 5) * 60 * 1000; // 5–10 mins
+            setTimeout(runGeneratorsAndReschedule, nextInterval);
+        }
+    
+        runGeneratorsAndReschedule();
     </script>
 @endpush
 
